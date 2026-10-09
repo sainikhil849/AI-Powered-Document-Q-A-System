@@ -1,0 +1,76 @@
+KESTREL AUTOMATION PVT. LTD.
+EMPLOYEE HANDBOOK - EDITION 2026
+
+This handbook is a fictional document created for testing a document question-answering system. Kestrel Automation Pvt. Ltd. is not a real company.
+
+1. INTRODUCTION
+
+1.1 This handbook describes the main workplace policies of Kestrel Automation Pvt. Ltd. ("the Company"). It applies to all full-time employees on the Company payroll. Contractors and interns follow the terms written in their individual agreements.
+
+1.2 Questions about any policy in this handbook should be sent to the Human Resources (HR) team at hr@kestrel-automation.example. HR replies to policy questions within 2 working days.
+
+2. WORKING HOURS
+
+2.1 The standard working week is 40 hours, from Monday to Friday.
+
+2.2 Core working hours are 10:00 a.m. to 4:00 p.m. on working days. All employees must be available for meetings and calls during core hours.
+
+2.3 Employees may choose a start time between 8:00 a.m. and 10:00 a.m., provided they complete 8 working hours each day.
+
+2.4 Each working day includes an unpaid lunch break of 45 minutes.
+
+2.5 Overtime must be approved in writing by the employee's manager before the work is done. Approved overtime is paid at 1.5 times the normal hourly rate, or the employee may choose compensatory time off of the same length instead.
+
+3. ANNUAL LEAVE
+
+3.1 Full-time employees receive 20 days of paid annual leave per calendar year.
+
+3.2 Annual leave accrues monthly at a rate of 1.67 days per completed month of service. Employees who join during the year receive a prorated entitlement for that year.
+
+3.3 Requests for annual leave must be submitted through the HR portal at least 14 days before the first day of leave.
+
+3.4 Leave of more than 10 consecutive working days requires approval from the head of the department in addition to the employee's manager.
+
+3.5 Up to 5 unused days of annual leave may be carried over to the next calendar year. Carried-over days must be used by 31 March of that year, otherwise they expire. Unused days above this limit are forfeited and are not paid out.
+
+4. SICK LEAVE
+
+4.1 Employees receive 12 days of paid sick leave per calendar year.
+
+4.2 An employee who is unwell must inform their manager before 10:00 a.m. on the first day of absence.
+
+4.3 A medical certificate from a registered medical practitioner is required for any sick leave longer than 3 consecutive days.
+
+4.4 Unused sick leave does not carry over to the next calendar year and is not paid out when employment ends.
+
+5. REMOTE WORK
+
+5.1 Employees become eligible for remote work after completing their 90-day probation period.
+
+5.2 Eligible employees may work remotely for up to 2 days per week. The remote days must be agreed with the employee's manager in advance.
+
+5.3 While working remotely, employees must be reachable during core working hours and must use the Company VPN for all work systems.
+
+5.4 The Company provides a laptop and pays an internet allowance of INR 1,500 per month to employees who work remotely at least one day per week.
+
+5.5 Fully remote arrangements are an exception. They require approval from the Vice President of the employee's division and are reviewed every 6 months.
+
+6. BEREAVEMENT LEAVE
+
+6.1 Employees may take up to 3 days of paid bereavement leave after the death of an immediate family member. Immediate family means a spouse, child, parent or sibling.
+
+7. PUBLIC HOLIDAYS
+
+7.1 The Company observes 10 paid public holidays each year. The list of public holidays for the next year is published by HR every December.
+
+8. EQUIPMENT AND INFORMATION SECURITY
+
+8.1 Company laptops must be locked whenever they are left unattended.
+
+8.2 Passwords for Company systems must be changed every 90 days and must not be shared with anyone, including colleagues and managers.
+
+8.3 Lost or stolen equipment must be reported to the IT helpdesk within 24 hours.
+
+9. CHANGES TO THIS HANDBOOK
+
+9.1 The Company may update these policies. Employees are notified by email at least 30 days before any change takes effect.

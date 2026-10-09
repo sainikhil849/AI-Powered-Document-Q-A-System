@@ -1,0 +1,24 @@
+# Tested together on Python 3.11, 3.12 and 3.13 (see README "Python and dependency requirements").
+# Exact pins keep the LangChain / LangGraph / Chroma combination reproducible.
+
+# --- Web API ---
+fastapi==0.143.0
+uvicorn==0.54.0
+python-multipart==0.0.32          # multipart/form-data parsing for POST /upload
+pydantic==2.14.0
+pydantic-settings==2.15.0         # typed settings from .env / environment variables
+
+# --- LLM orchestration and document processing ---
+langchain-core==1.6.9
+langchain-text-splitters==1.1.3   # RecursiveCharacterTextSplitter
+langchain-ollama==1.1.0           # ChatOllama + OllamaEmbeddings (local Ollama only)
+ollama==0.6.3                     # HTTP client used by langchain-ollama
+langgraph==1.2.14                 # StateGraph workflow
+
+# --- Storage and parsing ---
+chromadb==1.5.9                   # local persistent vector store
+pypdf==6.19.0                     # page-by-page PDF text extraction
+httpx==0.28.1                     # Ollama diagnostics, smoke test, FastAPI TestClient
+
+# --- Testing ---
+pytest==9.1.1

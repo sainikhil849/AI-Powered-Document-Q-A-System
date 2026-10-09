@@ -1,0 +1,49 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	process_question(process_question)
+	select_documents(select_documents)
+	gather_overview(gather_overview)
+	retrieve_documents(retrieve_documents)
+	evaluate_evidence(evaluate_evidence)
+	reformulate_question(reformulate_question)
+	generate_answer(generate_answer)
+	validate_grounding(validate_grounding)
+	final_response(final_response)
+	insufficient_response(insufficient_response)
+	handle_error(handle_error)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> process_question;
+	evaluate_evidence -.-> generate_answer;
+	evaluate_evidence -.-> handle_error;
+	evaluate_evidence -.-> insufficient_response;
+	evaluate_evidence -.-> reformulate_question;
+	gather_overview -.-> generate_answer;
+	gather_overview -.-> handle_error;
+	gather_overview -.-> insufficient_response;
+	generate_answer -.-> handle_error;
+	generate_answer -.-> insufficient_response;
+	generate_answer -.-> validate_grounding;
+	process_question -.-> handle_error;
+	process_question -.-> select_documents;
+	reformulate_question -.-> handle_error;
+	reformulate_question -.-> retrieve_documents;
+	retrieve_documents -.-> evaluate_evidence;
+	retrieve_documents -.-> handle_error;
+	select_documents -.-> gather_overview;
+	select_documents -.-> handle_error;
+	select_documents -.-> retrieve_documents;
+	validate_grounding -.-> final_response;
+	validate_grounding -.-> generate_answer;
+	validate_grounding -.-> handle_error;
+	validate_grounding -.-> insufficient_response;
+	final_response --> __end__;
+	handle_error --> __end__;
+	insufficient_response --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
