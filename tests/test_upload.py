@@ -221,6 +221,7 @@ def test_sanitize_filename_strips_paths_and_control_characters():
         ("a.txt", b"\n\n   \n", NoExtractableTextError),
         ("a.txt", b"x" * (1024 * 1024 + 1), FileTooLargeError),
     ],
+    ids=("unsupported-type", "empty-file", "invalid-pdf", "corrupt-pdf", "blank-text", "oversized-file"),
 )
 def test_processor_raises_typed_errors(name, content, error):
     with pytest.raises(error):

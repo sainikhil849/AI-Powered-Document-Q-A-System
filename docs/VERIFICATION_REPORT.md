@@ -51,7 +51,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 Copy-Item .env.example .env
 
-pytest                                   # expect: 173 passed, 1 skipped
+pytest                                   # current Windows/Python 3.12 run: 176 passed, 1 skipped
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 # second terminal (activate .venv again):
 python scripts\smoke_test.py             # real-model end-to-end check
@@ -60,13 +60,19 @@ $env:RUN_OLLAMA_TESTS = "1"; pytest -m ollama -v -s
 
 ## 3. Actual test results
 
-Fresh virtual environment per Python version, `pip install -r requirements.txt`, then `pytest`:
+Original Linux build-environment results (before three focused speed/answer-quality tests
+were added), using a fresh virtual environment per Python version:
 
 | Python | Result |
 |---|---|
 | 3.11.17 | 173 passed, 1 skipped |
 | 3.12.3 | 173 passed, 1 skipped |
 | 3.13.16 | 173 passed, 1 skipped |
+
+Current revision on Windows with Python 3.12: `pytest -q` → **176 passed, 1 skipped**
+(92.16 seconds). The skipped module is the opt-in real-Ollama test module described below.
+The first Windows run exposed overly long generated pytest IDs on a parameterized test;
+short explicit IDs were added and the full suite then passed.
 
 - The 1 skipped item is the module `tests/integration/test_real_ollama.py` (5 tests), which needs `RUN_OLLAMA_TESTS=1` and a real Ollama. **NOT VERIFIED.** (Its code path was dry-run against the Ollama-API stub: 3 passed; the colloquial-wording test failed there as expected, because the stub's fixed rules do not understand paraphrases — a real model is needed for that test.)
 - Line coverage of `app/`: 94 % (coverage.py).
@@ -188,5 +194,5 @@ question) and `pytest -m ollama`.
 7. Ask "Can I work from my house some days, and how many?" with trace → if `retries_used > 0`, show `queries`: the reformulated query was used only for retrieval.
 8. Ask "How many weeks of maternity leave do employees get?" with trace → `found: false`, `sources: []`, three queries, `abstain_reason: insufficient_evidence`. Say: "the generator was never called, so nothing could be invented."
 9. Errors: upload any `.docx` → `415`; ask with `"document_id": "0000000000000000"` → `404`. Show the standard body with `request_id`.
-10. `GET /graph` → conditional edges; terminal: `pytest -q` → 173 passed.
+10. `GET /graph` → conditional edges; terminal: `pytest -q` → 176 passed, 1 skipped on the current Windows/Python 3.12 revision.
 11. Close with the limitation: "These checks reduce hallucinations; they don't guarantee zero. When unsure, the system abstains."

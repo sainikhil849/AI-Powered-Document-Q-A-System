@@ -13,8 +13,9 @@ access, **Ollama** for the local models (`llama3` + `nomic-embed-text`) and
 **Chroma** as a persistent local vector store. No paid API, cloud service or
 LangSmith account is used, and uploaded content never leaves the machine.
 
-> **Verification status (be precise in your evaluation):** the full automated
-> suite (173 tests) passes on Python 3.11, 3.12 and 3.13. The real FastAPI server,
+> **Verification status (be precise in your evaluation):** the original full automated
+> suite (173 tests) passed on Python 3.11, 3.12 and 3.13. The current suite also includes
+> three focused speed/answer-quality regression tests. The real FastAPI server,
 > PDF/TXT parsing, Chroma persistence, automatic document selection, document
 > overviews, the LangGraph retry and abstention paths,
 > and the LangChain Ollama clients over HTTP were all exercised end to end
@@ -75,7 +76,7 @@ The build-time verification evidence is in [`docs/VERIFICATION_REPORT.md`](docs/
 | Objective | How it is met |
 |---|---|
 | Answer questions from an uploaded PDF/TXT | Retrieval-augmented generation (RAG): chunks are embedded, stored in Chroma, retrieved per question and passed to the LLM |
-| Use only document evidence | Three separate checks: evidence relevance/sufficiency, grounded generation with citations, grounding validation |
+| Use only document evidence | Evidence relevance/sufficiency, grounded generation with citations, deterministic citation/number checks, and an optional LLM grounding check |
 | Admit when the answer is missing | A fixed abstention response (`found: false`, no sources) on every "not enough evidence" path |
 | Show where answers come from | Sources are built from stored chunk text and metadata (document ID, filename, one-based page, chunk index) — never from model output |
 | Recover from a poor first search | LangGraph loop: reformulate the search query and retrieve again, at most `MAX_RETRIES` (default 2) times |
@@ -92,9 +93,9 @@ The build-time verification evidence is in [`docs/VERIFICATION_REPORT.md`](docs/
 | C. Local models | `ChatOllama` + `OllamaEmbeddings`, all model names/URL from env vars, startup diagnostics for missing Ollama/models, no silent model switching |
 | D. Retrieval and evidence | Configurable top-k, similarity used as a ranking signal, structured LLM relevance/sufficiency judgement with validated JSON, conservative handling of malformed output |
 | E. LangGraph | Real `StateGraph` with typed state, 11 focused nodes, 8 conditional routers (including fact vs document-level routing), bounded reformulation loop and bounded correction loop, error branch, recursion limit |
-| F. Grounded answers | Evidence-only prompt, citation labels mapped to real chunks, deterministic + LLM grounding validation, bounded correction or abstention |
+| F. Grounded answers | Evidence-only prompt, citation labels mapped to real chunks, deterministic grounding validation, optional LLM grounding check, bounded correction or abstention |
 | G. Errors and security | One stable error body for 24 documented error codes, no stack traces/paths in responses, no document text in logs, prompt-injection hardening, `.gitignore` for secrets and indexes |
-| Testing | 173 automated tests: 167 unit/API tests (fakes + temporary Chroma) and 6 HTTP-level integration tests against an Ollama-API stub; plus 5 opt-in tests for real Ollama |
+| Testing | 176 default-suite tests: 170 unit/API tests (fakes + temporary Chroma) and 6 HTTP-level integration tests against an Ollama-API stub; plus 5 opt-in tests for real Ollama |
 | Documentation | This README, `docs/TECHNICAL_WALKTHROUGH.md`, `docs/VERIFICATION_REPORT.md`, generated `docs/langgraph_workflow.mmd` |
 
 ## 3. Architecture
@@ -499,7 +500,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 
 # 2. Verify
-pytest                         # expected: 173 passed, 1 skipped
+pytest                         # expected: 176 passed, 1 skipped (Python 3.12, Windows)
 
 # 3. Run
 uvicorn app.main:app --host 127.0.0.1 --port 8000
@@ -1005,13 +1006,16 @@ Remove-Item Env:RUN_OLLAMA_TESTS
 python scripts/smoke_test.py
 ```
 
-**Actual results in the build environment (Linux, 9 Oct 2026):**
+**Original build-environment results (Linux, 9 Oct 2026; before three focused regression tests were added):**
 
 | Python | Result |
 |---|---|
 | 3.11.17 | 173 passed, 1 skipped |
 | 3.12.3 | 173 passed, 1 skipped |
 | 3.13.16 | 173 passed, 1 skipped |
+
+**Current revision:** Python 3.12 on Windows — **176 passed, 1 skipped**. The three
+additional tests cover the faster grounding-check default and answer-prompt quality.
 
 The skip is `tests/integration/test_real_ollama.py` (5 tests), which runs only with
 `RUN_OLLAMA_TESTS=1` — **not verified** in the build environment. Line coverage of
@@ -1022,7 +1026,7 @@ The skip is `tests/integration/test_real_ollama.py` (5 tests), which runs only w
 | `test_health.py` | 6 | health payload, dependency diagnostics, Swagger, error body, `/graph` |
 | `test_upload.py` | 35 | TXT/PDF success, duplicates, 415/400/413/422 cases, encodings, page numbers, cross-page chunks, offsets, filename sanitising |
 | `test_ask.py` | 42 | grounded answers with real sources, PDF page numbers, abstention, document overviews (incl. typo wording), automatic document selection with scores, filename mentions, `DEFAULT_DOCUMENT_SCOPE=latest`, invalid input, 404s, LLM/embedding/vector failures, isolation, persistence |
-| `test_retrieval.py` | 51 | ranking, top-k, single/multi-document filters, selection modes, summary detection, topic words, filename mentions, overview sampling, similarity floor, dimension mismatch, nomic prefixes, JSON parsing/repair, evaluator validation, grounding checks |
+| `test_retrieval.py` | 54 | ranking, top-k, single/multi-document filters, selection modes, summary detection, topic words, filename mentions, overview sampling, similarity floor, dimension mismatch, nomic prefixes, JSON parsing/repair, evaluator validation, grounding checks, fast defaults and explanatory prompts |
 | `test_graph.py` | 33 | reformulation with real retrieval, retry limits (0–3), grounding correction/abstention, document-level path, every branch terminates (15 branches), recursion-limit guard, conditional edges exist |
 | `integration/test_ollama_http_contract.py` | 6 | real `ChatOllama`/`OllamaEmbeddings` over HTTP: JSON-schema format, prefixes, overview, missing models, Ollama down, timeout |
 | `integration/test_real_ollama.py` | 5 (opt-in) | real models: direct fact, other section, colloquial question, maternity abstention, document overview |
@@ -1091,7 +1095,7 @@ makes tests fail.
 
 | Decision | Why | Trade-off |
 |---|---|---|
-| Separate evaluator, generator and fact-checker calls | Matches the three required decisions; each output is validated on its own | 3+ LLM calls per question — slower on CPU |
+| Separate evidence evaluator and answer generator; optional fact-checker | Keeps retrieval sufficiency separate from answer generation; semantic fact-checking can be enabled when preferred | Two LLM calls by default for fact questions; enabling the fact-check adds latency |
 | Similarity ranks, LLM decides sufficiency; no default threshold | Benchmark shows similarity does not separate answerable from unanswerable questions | Depends on the local model's judgement; costs one LLM call |
 | Reformulated query used only for retrieval | User intent cannot drift; evaluation/answer always use the original question | A poor rewrite wastes a retry instead of being "fixed" later |
 | Content-hash document IDs + idempotent re-upload | Stable IDs, no duplicate vectors, safe retries of uploads | Same bytes under a new filename keeps the first filename |
@@ -1142,7 +1146,7 @@ Future improvements:
 | 3:15 | Ask "Can I work from my house some days, and how many?" with trace | Colloquial wording; if the first search is weak, `queries` shows the reformulation |
 | 3:45 | Ask "How many weeks of maternity leave do employees get?" with trace | `found: false`, `sources: []`, three queries tried, `abstain_reason` |
 | 4:15 | Upload a `.docx` → 415; ask with `document_id: "0000000000000000"` → 404 | Stable error body with `request_id` |
-| 4:40 | `GET /graph` and `pytest -q` | Real StateGraph with conditional edges; 173 passing tests |
+| 4:40 | `GET /graph` and `pytest -q` | Real StateGraph with conditional edges; 176 passing tests, 1 opt-in skip |
 
 ## 36. Requirement → code → test traceability
 
